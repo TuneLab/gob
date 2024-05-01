@@ -52,17 +52,7 @@ func NewEndpoints(service pb.{{.Service.Name}}Server) svc.Endpoints {
 	service = handlers.WrapService(service)
 
 	// Endpoint domain.
-	var (
-	{{range $i := .Service.Methods -}}
-		{{ToLower $i.Name}}Endpoint = svc.Make{{$i.Name}}Endpoint(service)
-	{{end}}
-	)
-
-	endpoints := svc.Endpoints{
-	{{range $i := .Service.Methods -}}
-		{{$i.Name}}Endpoint:    {{ToLower $i.Name}}Endpoint,
-	{{end}}
-	}
+	endpoints := svc.NewEndpoints(service)
 
 	// Wrap selected Endpoints with middlewares. See handlers/middlewares.go
 	endpoints = handlers.WrapEndpoints(endpoints)
