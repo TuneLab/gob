@@ -13,6 +13,7 @@ SHA := $(shell git rev-parse --short=10 HEAD)
 
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VERSION_DATE := $(shell $(MAKEFILE_PATH)/../../commit_date.sh)
+BRANCH := $(shell git branch --show-current)
 
 export PATH := $(CURDIR):$(PATH)
 
@@ -21,7 +22,10 @@ all: test
 test: clean test-transport test-middlewares test-server
 
 truss:
-	go install -ldflags '-X "main.version=$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
+	go install -ldflags '-X "main.version=$(BRANCH).$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
+
+mytruss:
+	go build -ldflags '-X "main.version=$(BRANCH).$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
 
 test-transport: truss
 	@which truss

@@ -1,6 +1,10 @@
 package generator
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/hex"
+	"fmt"
 	"go/format"
 	"io"
 	"io/ioutil"
@@ -96,7 +100,6 @@ func TestApplyTemplateFromPath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	_, err = testFormat(string(endCode))
 	if err != nil {
 		t.Fatal(err)
@@ -312,4 +315,52 @@ func testFormat(code string) (string, error) {
 	}
 
 	return string(formatted), nil
+}
+
+func compressFile(filePath string) ([]byte, error) {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("read file: %w", err)
+	}
+
+	var buf bytes.Buffer
+
+	gzWriter := gzip.NewWriter(&buf)
+	_, err = gzWriter.Write(data)
+	if err != nil {
+		return nil, fmt.Errorf("compress data: %w", err)
+	}
+
+	err = gzWriter.Close()
+	if err != nil {
+		return nil, fmt.Errorf("close gzip writer: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+func Test_gzipTemplateContent(t *testing.T) {
+	// filePath := "../template/NAME-service/svc/client/grpc/client.gotemplate"
+	filePath := "../template/NAME-service/svc/endpoints.gotemplate"
+	// filePath := "../template/NAME-service/svc/server/run.gotemplate"
+	compressedData, err := compressFile(filePath)
+	if err != nil {
+		log.Fatal("Compression error:", err)
+	}
+
+	// 将压缩后的数据转换为16进制表示
+	hexEncoded := hex.EncodeToString(compressedData)
+	fmt.Println("Compressed data:", hexEncoded)
+
+	hexStr := strings.Builder{}
+	for index := 0; index < len(hexEncoded); index += 2 {
+		hexStr.WriteString("\\x")
+		end := index + 2
+		if end > len(hexEncoded) {
+			end = len(hexEncoded)
+		}
+		hexStr.WriteString(hexEncoded[index:end])
+	}
+	fmt.Println("Compressed data2:", hexStr.String())
+
 }
