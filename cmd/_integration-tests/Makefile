@@ -25,7 +25,7 @@ truss:
 	go install -ldflags '-X "main.version=$(BRANCH).$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
 
 mytruss:
-	go build -ldflags '-X "main.version=$(BRANCH).$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
+	go build -o mytruss  -ldflags '-X "main.version=$(BRANCH).$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
 
 test-transport: truss
 	@which truss
